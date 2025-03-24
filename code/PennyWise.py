@@ -27,7 +27,7 @@ class GroceryDB:
         self.create_tables()
         self.grocery_list = []
         self.vectordb = None
-        self.init_grocery_vectorDB("/home/deepak/workspace/learn_AI/apps/grocery_list.txt")
+        self.init_grocery_vectorDB("../data/grocery_list.txt")
         #self.search_grocery_vectorDB("Black Grapes seedless")
 
     def connect(self):
@@ -254,7 +254,7 @@ if __name__ == "__main__":
     pennywise = PennyWise()
 
     # List of receipt image paths
-    folder_path = "/home/deepak/workspace/learn_AI/data/receipts"
+    folder_path = "../data/receipts"
     receipt_images = [os.path.join(folder_path, file) for file in os.listdir(folder_path) if (file.lower().endswith('.jpg') or file.lower().endswith('.png'))]
 
     # Process the receipts
@@ -263,33 +263,4 @@ if __name__ == "__main__":
 
 
 
-
-
-""" 
-    def add_table_entry(self, c1, c2, c3):
-        try:
-            cursor = self.connection.cursor()
-
-            # SQL insert query
-            insert_query = sql.SQL("INSERT INTO grocery_items (c1, c2, c3) VALUES (%s, %s, %s)")
-            
-            # Execute query
-            cursor.execute(insert_query, (c1, c2, c3))
-
-            # Commit changes
-            self.connection.commit()
-            print("Data inserted successfully.")
-
-        except Exception as e:
-            print(f"Error: {e}")
-            if conn:
-                conn.rollback()
-        
-        finally:
-            # Close cursor and connection
-            if cursor:
-                cursor.close()
-            if conn:
-                conn.close()
- """
     
