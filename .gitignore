@@ -1,0 +1,8 @@
+~/
+models/
+logs/
+.env
+results/
+.ollama/
+data/postgresdb
+data/receipts

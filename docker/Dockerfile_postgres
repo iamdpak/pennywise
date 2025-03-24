@@ -1,0 +1,20 @@
+FROM postgres:latest
+
+
+ENV DEBIAN_FRONTEND noninteractive
+
+# Set environment variables for PostgreSQL
+ENV POSTGRES_USER=postgres \
+    POSTGRES_PASSWORD=password \
+    POSTGRES_DB=postgres
+
+# Expose PostgreSQL port
+EXPOSE 5432
+
+# Copy any custom SQL scripts to initialize the database
+# (Optional) Place SQL files in the same directory as the Dockerfile
+# COPY ./init.sql /docker-entrypoint-initdb.d/
+
+#USER $USERNAME
+# Default command to run PostgreSQL
+CMD ["postgres"]
