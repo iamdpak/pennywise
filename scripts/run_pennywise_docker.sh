@@ -25,6 +25,6 @@ docker run --user $(id -u) \
 	--ipc=host --ulimit memlock=-1 --ulimit stack=67108864 \
 	--privileged -v /dev/bus/usb:/dev/bus/usb \
 	--publish 5432:5432 \
-	deepak/pennywise:latest \
+	experiments/pennywise:latest \
 	${1:-bash} \
 	1>&2
