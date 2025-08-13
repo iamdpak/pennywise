@@ -27,4 +27,4 @@ docker run --user $(id -u) \
 	--ipc=host --ulimit memlock=-1 --ulimit stack=67108864 \
 	--privileged \
 	--publish 11434:11434 \
-	experiments/official-ollama:latest
+	ollama/ollama:latest

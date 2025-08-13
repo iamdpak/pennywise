@@ -23,6 +23,6 @@ docker run --user postgres \
     -e POSTGRES_PASSWORD=password \
     -e POSTGRES_DB=postgres \
 	--env TERM=xterm-256color \
-	--publish 5432:5432 \
+	--publish 5433:5432 \
 	experiments/postgres:latest
 	
