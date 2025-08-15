@@ -29,4 +29,5 @@ RUN pip install --upgrade pip
 RUN pip install psycopg2-binary
 RUN pip install ollama
 RUN pip install faiss-gpu
+RUN apt install iputils-ping
 USER $USERNAME

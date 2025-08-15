@@ -25,10 +25,6 @@ class GroceryDB:
         self.create_database()
         self.connect()
         self.create_tables()
-        self.grocery_list = []
-        self.vectordb = None
-        self.init_grocery_vectorDB("../data/grocery_list.txt")
-        #self.search_grocery_vectorDB("Black Grapes seedless")
 
     def connect(self):
         """Establishes a connection to the PostgreSQL database."""
@@ -56,11 +52,11 @@ class GroceryDB:
         """Creates the required tables if they do not exist."""
         cursor = self.connection.cursor()
         
-        # Create grocery_items table
+        # Create receipts table
         cursor.execute("""
-            CREATE TABLE IF NOT EXISTS grocery_items (
+            CREATE TABLE IF NOT EXISTS receipts (
                 id SERIAL PRIMARY KEY,
-                price DECIMAL(10, 2) NOT NULL,
+                total DECIMAL(10, 2) NOT NULL,
                 shop_name TEXT NOT NULL,
                 shop_ABN TEXT NOT NULL,
                 shop_address TEXT NOT NULL,
@@ -75,16 +71,16 @@ class GroceryDB:
     def update_table(self, json_record):     
         cursor = self.connection.cursor()   
         sql_query = """
-        INSERT INTO grocery_items (price, shop_name, shop_ABN, shop_address, category, date_purchased)
+        INSERT INTO receipts (total, shop_name, shop_ABN, shop_address, category, date_purchased)
         VALUES (%s, %s, %s, %s, %s, %s);
         """
 
         cursor.execute(sql_query, (
-            json_record["price"],
+            json_record["total"],
             json_record["shop_name"],
             json_record["shop_abn"],
             json_record["shop_address"],
-            json_record["item_category"],
+            json_record["receipt_category"],
             json_record["date_purchased"]
         ))
         
@@ -140,34 +136,30 @@ class PennyWise:
         # update the db
         print (self.receipt_data[image_path])
 
-        for json_record in self.receipt_data[image_path]['grocery_items']:
+        for json_record in self.receipt_data[image_path]['receipt_data']:
             self.gdb.update_table(json_record)
 
 
 
     def llm_passthrough(self, image_path):
         
-        json_str = json.dumps({"grocery_items":[{
+        json_str = json.dumps({"receipt_data":{
             "uuid": "550e8400-e29b-41d4-a716-446655440000",
-            "item_name": "pink lady apple",
-            "price": "5.99",
+            "total": "5.99",
             "date_purchased": "2025-02-18",
             "shop_name": "woolworths",
             "shop_address": "123 Main St, Springfield, IL",
             "shop_abn": "1234567",
-            "item_category": "Pink Lady Apples",
-        },
-        {
-            "uuid": "550e8400-e29b-41d4-a716-446655240100",
-            "item_name": "Mango Honey Gold",
-            "price": "5.99",
-            "date_purchased": "2025-02-18",
-            "shop_name": "woolworths",
-            "shop_address": "123 Main St, Springfield, IL",
-            "shop_abn": "1234567",
-            "item_category": "Honey Gold Mangoes",
-        }]})
-        text_prompt = text_prompt = f"""Given the receipt image extract the grocery items with their cost and other receipt details line date and shop details. 
+            "receipt_category": "grocery",
+        }})
+        text_prompt = text_prompt = f"""Given the receipt image extract the category of the receipt
+        from the options
+         1. grocery
+         2. fuel
+         3. food
+        if the receipt doesn't fit into the above options, give me a new category.
+        
+        Extract the total cost of the receipt, purchase data, shop name, shop address, abn.
         Respond to me ONLY in JSON format similar to the example below:
         {json_str}
         Wrap the JSON output within triple backticks.
@@ -186,12 +178,6 @@ class PennyWise:
             json_data = json.loads(extracted_json)  # Convert JSON string to a Python object
             print(json.dumps(json_data, indent=4))
 
-        for i in range(len(json_data["grocery_items"])):
-            #item_categories = self.gdb.search_grocery_vectorDB(json_data["grocery_items"][i]["item_name"])
-            #tmp_prompt = f"The response should contain only the item category title. do you think {item_categories[0][0]} and {json_data['grocery_items'][i]['item_name']} are the same? If yes, respond with item catetory else suggest me the correct item category. Make sure you respond only the item category and no supporting text" 
-            tmp_prompt = f"Given the item name extracted from the receipt, {json_data['grocery_items'][i]['item_name']} what is the item name? Respond only with the item name and NOT as a statement. Choose from the list {self.gdb.grocery_list} if present." 
-            response_item_category = self.send_request_textonly(tmp_prompt)
-            json_data["grocery_items"][i]["item_category"] = response_item_category
         return json_data
 
 
@@ -254,7 +240,7 @@ if __name__ == "__main__":
     pennywise = PennyWise()
 
     # List of receipt image paths
-    folder_path = "../data/receipts"
+    folder_path = "/workspace/data/receipts"
     receipt_images = [os.path.join(folder_path, file) for file in os.listdir(folder_path) if (file.lower().endswith('.jpg') or file.lower().endswith('.png'))]
 
     # Process the receipts

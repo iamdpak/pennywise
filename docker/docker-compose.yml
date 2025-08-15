@@ -1,8 +1,6 @@
 version: "3.9"
 
-networks:
-  docker_pennywise:
-    driver: bridge
+
 
 services:
   ollama:
@@ -10,7 +8,7 @@ services:
     container_name: ollama-server
     hostname: ollama-server
     networks:
-      - docker_pennywise
+      - pennywise_net
     volumes:
       - .:${PWD}
       - ./.docker_history:/home/${USER}/.bash_history
@@ -41,9 +39,8 @@ services:
     container_name: pennywise
     hostname: pennywise
     user: "${UID:-1000}:${GID:-1000}"
-    network_mode: host
     volumes:
-      - .:${PWD}
+      - ${PWD}:/workspace
       - ./.docker_history:/home/${USER}/.bash_history
       - ./.env:/home/${USER}/.env
       - /tmp/.x11-unix:/tmp/.X11-unix:rw
@@ -65,7 +62,8 @@ services:
     stdin_open: true
     tty: true
     command: bash
-
+    networks:
+      - pennywise_net
 
   postgresdb:
     image: postgres:16
@@ -79,6 +77,9 @@ services:
     volumes:
       - pennydata:/var/lib/postgresql/data
     networks:
-      - docker_pennywise
+      - pennywise_net
 volumes:
   pennydata:
+
+networks:
+  pennywise_net:
